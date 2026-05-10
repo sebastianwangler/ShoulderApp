@@ -9,7 +9,7 @@
   html, body { touch-action: manipulation; }
 
   body {
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     text-align: center;
     margin: 0;
     padding: 12px 16px 40px;
@@ -17,15 +17,37 @@
     background: #fff;
   }
 
-  .back-link {
-    display: inline-block;
-    margin: 6px auto 0;
-    padding: 4px 8px;
-    font-size: 14px;
-    color: #666;
-    text-decoration: none;
+  /* Force all interactive elements to inherit font from body */
+  button, input, select, textarea, label {
+    font-family: inherit;
   }
-  .back-link:hover { color: #1a1a1a; text-decoration: underline; }
+
+  .back-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    margin: 0 auto 16px;
+    padding: 8px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1a1a1a;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: border-color 0.2s, background-color 0.2s, transform 0.15s;
+    cursor: pointer;
+  }
+  .back-link:hover { border-color: #999; background: #fafafa; }
+  .back-link:active { transform: translateY(1px); }
+
+  .copyright-footer {
+    margin-top: 32px;
+    text-align: center;
+    font-size: 0.75em;
+    color: #999;
+  }
 
   h1 { font-size: 1.5em; margin: 8px 0 8px; }
 
@@ -99,7 +121,7 @@
     border-radius: 5px;
     background: #fff;
     color: #1a1a1a;
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     font-size: 14px;
   }
   .control input:focus {
@@ -151,8 +173,8 @@
 
   .btn {
     padding: 11px 22px;
-    font-size: 14px;
-    font-family: Arial, sans-serif;
+    font-size: 15px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     font-weight: 600;
     border-radius: 5px;
     cursor: pointer;
@@ -220,7 +242,7 @@
   }
 
   .three-label {
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     font-size: 11px;
     font-weight: 600;
     background: rgba(255,255,255,0.92);
@@ -239,7 +261,7 @@
     line-height: 1.5;
   }
 
-  text { font-family: Arial, sans-serif; }
+  text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
   text.t  { font-size: 14px; fill: #1a1a1a; }
   text.ts { font-size: 12px; fill: #555; }
   text.th { font-size: 14px; font-weight: 600; fill: #1a1a1a; }
@@ -290,7 +312,7 @@
 </head>
 <body>
 
-<a href="index.html" class="back-link">← back</a>
+<a href="index.html" class="back-link">← menu</a>
 
 <h1>ShoulderApp - Wedge Calculator</h1>
 <p class="lead" style="display:none;"></p>
@@ -381,7 +403,7 @@
       <text id="section1-header" class="th" x="510" y="28" text-anchor="middle">Section - sup/inf (18°)</text>
       <g id="side-view-1"></g>
 
-      <text id="section2-header" class="th" x="510" y="248" text-anchor="middle">Section - ant/post (10°)</text>
+      <text id="section2-header" class="th" x="510" y="325" text-anchor="middle">Section - ant/post (10°)</text>
       <g id="side-view-2"></g>
     </svg>
   </div>
@@ -407,7 +429,7 @@
     <p class="viewer-hint">Drag to rotate · pinch or scroll to zoom</p>
   </div>
 
-  <p class="footer-note">All heights in mm. Center = average of the four edge heights.<br>Resulting slope = steepest tilt of the top surface (combining both axes); its endpoints give the absolute thinnest and thickest points of the wedge.</p>
+  <p class="footer-note">All heights in mm. Center = average of the four edge heights.<br>Resulting slope = steepest tilt of the top surface (combining both axes).</p>
 
 </div>
 
@@ -450,7 +472,7 @@
 
   function drawSide(groupId, D, hLeft, hRight, cx, cy, color, leftLabel, rightLabel) {
     var g = $(groupId);
-    var maxW = 240, maxH = 110;
+    var maxW = 200, maxH = 50;
     var maxHeight = Math.max(hLeft, hRight, 0.5);
     var scale = Math.min(maxW / D, maxH / maxHeight);
     var wPx = D * scale;
@@ -459,6 +481,7 @@
     var x0 = cx - wPx / 2;
     var x1 = cx + wPx / 2;
     var yBase = cy + 30;
+    // Flat bottom (floor) at yBase; angled top peaks where the wedge is thickest.
     var yTL = yBase - hLeftPx;
     var yTR = yBase - hRightPx;
 
@@ -467,15 +490,69 @@
       '<line x1="' + f(x0) + '" y1="' + f(yBase) + '" x2="' + f(x0) + '" y2="' + f(yTL) + '" stroke="' + color + '" stroke-width="0.5" opacity="0.7"/>' +
       '<line x1="' + f(x1) + '" y1="' + f(yBase) + '" x2="' + f(x1) + '" y2="' + f(yTR) + '" stroke="' + color + '" stroke-width="0.5" opacity="0.7"/>' +
       '<text class="ts" x="' + f(x0 - 6) + '" y="' + f((yBase + yTL) / 2 + 4) + '" text-anchor="end" fill="' + color + '">' + hLeft.toFixed(2) + ' mm</text>' +
-      '<text class="ts" x="' + f(x1 + 6) + '" y="' + f((yBase + yTR) / 2 + 4) + '" text-anchor="start" fill="' + color + '">' + hRight.toFixed(2) + ' mm</text>' +
-      '<text class="ts" x="' + f(cx) + '" y="' + f(yBase + 18) + '" text-anchor="middle" fill="#888">D = ' + D.toFixed(2) + ' mm</text>';
+      '<text class="ts" x="' + f(x1 + 6) + '" y="' + f((yBase + yTR) / 2 + 4) + '" text-anchor="start" fill="' + color + '">' + hRight.toFixed(2) + ' mm</text>';
 
     if (leftLabel) {
-      html += '<text class="ts" x="' + f(x0) + '" y="' + f(yBase + 32) + '" text-anchor="middle" fill="' + color + '" font-weight="600">' + leftLabel + '</text>';
+      html += '<text class="ts" x="' + f(x0) + '" y="' + f(yBase + 22) + '" text-anchor="middle" fill="' + color + '" font-weight="600">' + leftLabel + '</text>';
     }
     if (rightLabel) {
-      html += '<text class="ts" x="' + f(x1) + '" y="' + f(yBase + 32) + '" text-anchor="middle" fill="' + color + '" font-weight="600">' + rightLabel + '</text>';
+      html += '<text class="ts" x="' + f(x1) + '" y="' + f(yBase + 22) + '" text-anchor="middle" fill="' + color + '" font-weight="600">' + rightLabel + '</text>';
     }
+
+    g.innerHTML = html;
+  }
+
+  function drawSideVertical(groupId, D, hSup, hInf, cx, cy, color, flatOnRight) {
+    var g = $(groupId);
+    var maxH = 200; // vertical extent (D direction) — matches circle diameter
+    var maxW = 60;  // horizontal extent (thickness direction)
+    var maxHeight = Math.max(hSup, hInf, 0.5);
+    var scale = Math.min(maxH / D, maxW / maxHeight);
+    var dPx = D * scale;
+    var hSupPx = Math.max(hSup * scale, 1);
+    var hInfPx = Math.max(hInf * scale, 1);
+    var maxHpx = maxHeight * scale;
+    var yTop = cy - dPx / 2;
+    var yBot = cy + dPx / 2;
+    var xLeft = cx - maxHpx / 2;
+    var xRight = cx + maxHpx / 2;
+
+    var pTopL, pTopR, pBotL, pBotR;
+    if (flatOnRight) {
+      // Flat edge on the right (anatomically appropriate for right shoulder).
+      pTopR = { x: xRight, y: yTop };
+      pTopL = { x: xRight - hSupPx, y: yTop };
+      pBotR = { x: xRight, y: yBot };
+      pBotL = { x: xRight - hInfPx, y: yBot };
+    } else {
+      // Flat edge on the left (left shoulder).
+      pTopL = { x: xLeft, y: yTop };
+      pTopR = { x: xLeft + hSupPx, y: yTop };
+      pBotL = { x: xLeft, y: yBot };
+      pBotR = { x: xLeft + hInfPx, y: yBot };
+    }
+
+    var topMidX = (pTopL.x + pTopR.x) / 2;
+    var botMidX = (pBotL.x + pBotR.x) / 2;
+
+    var html =
+      '<polygon points="' +
+        f(pTopL.x) + ',' + f(pTopL.y) + ' ' +
+        f(pTopR.x) + ',' + f(pTopR.y) + ' ' +
+        f(pBotR.x) + ',' + f(pBotR.y) + ' ' +
+        f(pBotL.x) + ',' + f(pBotL.y) +
+      '" fill="' + color + '" fill-opacity="0.14" stroke="' + color + '" stroke-width="1"/>' +
+      // Horizontal guide lines at top (sup thickness) and bottom (inf thickness)
+      '<line x1="' + f(pTopL.x) + '" y1="' + f(yTop) + '" x2="' + f(pTopR.x) + '" y2="' + f(yTop) + '" stroke="' + color + '" stroke-width="0.5" opacity="0.7"/>' +
+      '<line x1="' + f(pBotL.x) + '" y1="' + f(yBot) + '" x2="' + f(pBotR.x) + '" y2="' + f(yBot) + '" stroke="' + color + '" stroke-width="0.5" opacity="0.7"/>' +
+      // Anatomy label "sup" above polygon
+      '<text class="ts" x="' + f(cx) + '" y="' + f(yTop - 18) + '" text-anchor="middle" fill="' + color + '" font-weight="600">sup</text>' +
+      // sup thickness label just above the top edge
+      '<text class="ts" x="' + f(topMidX) + '" y="' + f(yTop - 4) + '" text-anchor="middle" fill="' + color + '">' + hSup.toFixed(2) + ' mm</text>' +
+      // inf thickness label just below the bottom edge
+      '<text class="ts" x="' + f(botMidX) + '" y="' + f(yBot + 14) + '" text-anchor="middle" fill="' + color + '">' + hInf.toFixed(2) + ' mm</text>' +
+      // Anatomy label "inf" below polygon
+      '<text class="ts" x="' + f(cx) + '" y="' + f(yBot + 28) + '" text-anchor="middle" fill="' + color + '" font-weight="600">inf</text>';
 
     g.innerHTML = html;
   }
@@ -602,8 +679,8 @@
     setText('section1-header', 'Section - sup/inf (' + a1 + '°)');
     setText('section2-header', 'Section - ant/post (' + a2 + '°)');
 
-    drawSide('side-view-1', D, h1min, h1max, 510, 130, '#378ADD', 'inf', 'sup');
-    drawSide('side-view-2', D, hVisualLeft, hVisualRight, 510, 350, '#1D9E75', leftAnat, rightAnat);
+    drawSideVertical('side-view-1', D, h1max, h1min, 510, 160, '#378ADD', !mirrored);
+    drawSide('side-view-2', D, hVisualLeft, hVisualRight, 510, 353, '#1D9E75', leftAnat, rightAnat);
     drawResultLine('result-slope-line', resultDirRad, resultMin, resultMax, clockStr);
 
     // Anatomical heights: anterior is the lower side, posterior is the higher
@@ -662,7 +739,7 @@
     var cloned = svgEl.cloneNode(true);
     var styleEl = document.createElementNS('http://www.w3.org/2000/svg', 'style');
     styleEl.textContent = [
-      'text { font-family: Arial, sans-serif; }',
+      'text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }',
       'text.t  { font-size: 14px; fill: #1a1a1a; }',
       'text.ts { font-size: 12px; fill: #555; }',
       'text.th { font-size: 14px; font-weight: 600; fill: #1a1a1a; }'
@@ -875,28 +952,35 @@
       const center = (h1min + h1max) / 2;
       const tanA1 = (h1max - h1min) / D;
       const tanA2 = (h2max - h2min) / D * (mirrored ? -1 : 1);
-      // x = ant/post, z = sup/inf, y = up. 3D x convention is opposite of 2D math x:
-      // 3D +x corresponds to 2D circle LEFT (where post sits for right shoulder), so the
-      // 3D bird's-eye view orientation matches the 2D top view when toggling sides.
-      const topY = (x, z) => center + tanA2 * x + tanA1 * z;
+      // Wedge sits with the FLAT face on top (ceiling, at y=resultMax) and the
+      // ANGLED face on bottom (floor). The angled bottom dips deepest where the
+      // wedge is thickest. 3D x convention is opposite of 2D math x: 3D +x
+      // corresponds to 2D circle LEFT, so 3D bird's-eye matches 2D top view.
+      const halfDiff = r * Math.sqrt(tanA1 * tanA1 + tanA2 * tanA2);
+      const resultMax = center + halfDiff;
+      const thickness = (x, z) => center + tanA2 * x + tanA1 * z;
+      const angledY = (x, z) => resultMax - thickness(x, z);
 
       const positions = [];
       const indices = [];
 
-      positions.push(0, 0, 0);
-      positions.push(0, topY(0, 0), 0);
+      // Vertex 0: flat top center; vertex 1: angled bottom center
+      positions.push(0, resultMax, 0);
+      positions.push(0, angledY(0, 0), 0);
 
+      // Flat top rim (constant y=resultMax)
       for (let i = 0; i < segments; i++) {
         const theta = (i / segments) * Math.PI * 2;
         const x = r * Math.cos(theta);
         const z = r * Math.sin(theta);
-        positions.push(x, 0, z);
+        positions.push(x, resultMax, z);
       }
+      // Angled bottom rim
       for (let i = 0; i < segments; i++) {
         const theta = (i / segments) * Math.PI * 2;
         const x = r * Math.cos(theta);
         const z = r * Math.sin(theta);
-        positions.push(x, topY(x, z), z);
+        positions.push(x, angledY(x, z), z);
       }
 
       for (let i = 0; i < segments; i++) {
@@ -983,16 +1067,16 @@
       const teal = 0x0F6E56;
       const leftAnatIs = state.leftAnat || 'ant';
 
-      // Compute heights at marker positions using the same signed tan2 as the mesh
+      // Markers sit on the angled BOTTOM face (now below the flat ceiling).
       const tanA1 = (state.h1max - state.h1min) / state.D;
       const tanA2 = (state.h2max - state.h2min) / state.D * (mirrored ? -1 : 1);
-      const topY = (x, z) => state.center + tanA2 * x + tanA1 * z;
+      const angledY = (x, z) => state.resultMax - (state.center + tanA2 * x + tanA1 * z);
 
       const points = [
-        { pos: [-r, topY(-r, 0), 0], color: teal, hex: '#0F6E56', label: leftAnatIs === 'ant' ? 'Post' : 'Ant' },
-        { pos: [ r, topY( r, 0), 0], color: teal, hex: '#0F6E56', label: leftAnatIs === 'ant' ? 'Ant' : 'Post' },
-        { pos: [ 0, topY(0, -r), -r], color: blue, hex: '#185FA5', label: 'Inf' },
-        { pos: [ 0, topY(0,  r),  r], color: blue, hex: '#185FA5', label: 'Sup' }
+        { pos: [-r, angledY(-r, 0), 0], color: teal, hex: '#0F6E56', label: leftAnatIs === 'ant' ? 'Post' : 'Ant' },
+        { pos: [ r, angledY( r, 0), 0], color: teal, hex: '#0F6E56', label: leftAnatIs === 'ant' ? 'Ant' : 'Post' },
+        { pos: [ 0, angledY(0, -r), -r], color: blue, hex: '#185FA5', label: 'Inf' },
+        { pos: [ 0, angledY(0,  r),  r], color: blue, hex: '#185FA5', label: 'Sup' }
       ];
 
       for (const p of points) {
@@ -1002,17 +1086,20 @@
         markers.push(marker);
 
         const label = makeLabel(p.label, p.hex);
-        label.position.set(p.pos[0], p.pos[1] + state.D * 0.05, p.pos[2]);
+        // Offset labels DOWNWARD (away from wedge body, which is above the angled bottom)
+        label.position.set(p.pos[0], p.pos[1] - state.D * 0.05, p.pos[2]);
         scene.add(label);
         labels.push(label);
       }
 
-      // Black resulting slope line on the wedge top, between min and max endpoints
+      // Black resulting slope line on the angled BOTTOM, between thickest and thinnest points.
+      // Thickest point: angled bottom dips to y=0 (resultMax - resultMax).
+      // Thinnest point: angled bottom at y=resultMax-resultMin (closest to flat top).
       if (typeof state.resultDirRad === 'number') {
         const cos = Math.cos(state.resultDirRad);
         const sin = Math.sin(state.resultDirRad);
-        const maxPoint = new THREE.Vector3(-cos * r, state.resultMax, sin * r);
-        const minPoint = new THREE.Vector3(cos * r, state.resultMin, -sin * r);
+        const maxPoint = new THREE.Vector3(-cos * r, 0, sin * r);
+        const minPoint = new THREE.Vector3(cos * r, state.resultMax - state.resultMin, -sin * r);
 
         const slopeLineGeom = new THREE.BufferGeometry().setFromPoints([minPoint, maxPoint]);
         const slopeLineMat = new THREE.LineBasicMaterial({ color: 0x000000 });
@@ -1132,6 +1219,8 @@
     if (recenterBtn) recenterBtn.style.display = 'none';
   }
 </script>
+
+<footer class="copyright-footer">© Sebastian Wangler</footer>
 
 </body>
 </html>

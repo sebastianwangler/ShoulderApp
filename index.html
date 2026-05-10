@@ -12,7 +12,7 @@
       touch-action: manipulation;
     }
     body {
-      font-family: Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: #fafafa;
       color: #1a1a1a;
       margin: 0;
@@ -21,6 +21,11 @@
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
+    }
+
+    /* Force all interactive elements to inherit font from body */
+    button, input, select, textarea, label {
+      font-family: inherit;
     }
     .container {
       max-width: 720px;
@@ -126,6 +131,50 @@
         padding: 24px 20px;
       }
     }
+
+    /* Disclaimer modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-content {
+      background: #fff;
+      padding: 24px 28px;
+      max-width: 420px;
+      margin: 16px;
+      text-align: center;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+    .modal-content h2 {
+      font-size: 1.2em;
+      margin: 0 0 12px;
+    }
+    .modal-content p {
+      font-size: 0.95em;
+      color: #555;
+      line-height: 1.5;
+      margin: 0 0 16px;
+    }
+    .modal-content button {
+      padding: 10px 22px;
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+    .modal-content button:hover { background: #333; }
   </style>
 </head>
 <body>
@@ -169,6 +218,32 @@
     </footer>
 
   </div>
+
+  <!-- Disclaimer modal: only shown until user has accepted (persists via localStorage) -->
+  <div id="disclaimer-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h2>Disclaimer</h2>
+      <p>This application is intended for research and educational purposes only. It is not a diagnostic tool.</p>
+      <button id="disclaimer-ok" type="button">OK</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var KEY = 'shoulderApp.disclaimerAccepted';
+      var modal = document.getElementById('disclaimer-modal');
+      var okBtn = document.getElementById('disclaimer-ok');
+      var accepted = false;
+      try { accepted = localStorage.getItem(KEY) === 'true'; } catch (e) {}
+      if (!accepted) {
+        modal.classList.remove('hidden');
+      }
+      okBtn.addEventListener('click', function () {
+        try { localStorage.setItem(KEY, 'true'); } catch (e) {}
+        modal.classList.add('hidden');
+      });
+    })();
+  </script>
 
 </body>
 </html>
