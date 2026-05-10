@@ -448,7 +448,7 @@
       <text id="lbl-result" class="th" x="180" y="415" text-anchor="middle" fill="#000">20.29° at 12:57</text>
 
       <!-- Section views (right half) -->
-      <text id="section1-header" class="th" x="510" y="28" text-anchor="middle">Section - sup/inf (18°)</text>
+      <text id="section1-header" class="th" x="510" y="20" text-anchor="middle">Section - sup/inf (18°)</text>
       <g id="side-view-1"></g>
 
       <text id="section2-header" class="th" x="510" y="325" text-anchor="middle">Section - ant/post (10°)</text>
@@ -579,27 +579,45 @@
       pBotR = { x: xLeft + hInfPx, y: yBot };
     }
 
+    // Rotate the polygon so the ANGLED edge becomes vertical.
+    // For flatOnRight: angled edge on left, slopes inward from upper-left to lower-right
+    //   → rotate CW by slope angle.
+    // For !flatOnRight: angled edge on right, slopes from upper-right to lower-left
+    //   → rotate CCW (opposite sign).
+    var slopeAngleRad = Math.atan2(hSupPx - hInfPx, dPx);
+    var rotateDeg = (slopeAngleRad * 180 / Math.PI) * (flatOnRight ? 1 : -1);
+
+    function rot(x, y) {
+      var a = rotateDeg * Math.PI / 180;
+      var c = Math.cos(a), s = Math.sin(a);
+      var dx = x - cx, dy = y - cy;
+      return { x: cx + c * dx - s * dy, y: cy + s * dx + c * dy };
+    }
+
     var topMidX = (pTopL.x + pTopR.x) / 2;
     var botMidX = (pBotL.x + pBotR.x) / 2;
+    var topAnchor = rot(topMidX, yTop);
+    var botAnchor = rot(botMidX, yBot);
+
+    var rotateAttr = 'transform="rotate(' + f(rotateDeg) + ' ' + f(cx) + ' ' + f(cy) + ')"';
 
     var html =
-      '<polygon points="' +
-        f(pTopL.x) + ',' + f(pTopL.y) + ' ' +
-        f(pTopR.x) + ',' + f(pTopR.y) + ' ' +
-        f(pBotR.x) + ',' + f(pBotR.y) + ' ' +
-        f(pBotL.x) + ',' + f(pBotL.y) +
-      '" fill="' + color + '" fill-opacity="0.14" stroke="' + color + '" stroke-width="1"/>' +
-      // Horizontal guide lines at top (sup thickness) and bottom (inf thickness)
-      '<line x1="' + f(pTopL.x) + '" y1="' + f(yTop) + '" x2="' + f(pTopR.x) + '" y2="' + f(yTop) + '" stroke="' + color + '" stroke-width="0.5" opacity="0.7"/>' +
-      '<line x1="' + f(pBotL.x) + '" y1="' + f(yBot) + '" x2="' + f(pBotR.x) + '" y2="' + f(yBot) + '" stroke="' + color + '" stroke-width="0.5" opacity="0.7"/>' +
-      // Anatomy label "sup" above polygon
-      '<text class="ts" x="' + f(cx) + '" y="' + f(yTop - 18) + '" text-anchor="middle" fill="' + color + '" font-weight="600">sup</text>' +
-      // sup thickness label just above the top edge
-      '<text class="ts" x="' + f(topMidX) + '" y="' + f(yTop - 4) + '" text-anchor="middle" fill="' + color + '">' + hSup.toFixed(2) + ' mm</text>' +
-      // inf thickness label just below the bottom edge
-      '<text class="ts" x="' + f(botMidX) + '" y="' + f(yBot + 14) + '" text-anchor="middle" fill="' + color + '">' + hInf.toFixed(2) + ' mm</text>' +
-      // Anatomy label "inf" below polygon
-      '<text class="ts" x="' + f(cx) + '" y="' + f(yBot + 28) + '" text-anchor="middle" fill="' + color + '" font-weight="600">inf</text>';
+      '<g ' + rotateAttr + '>' +
+        '<polygon points="' +
+          f(pTopL.x) + ',' + f(pTopL.y) + ' ' +
+          f(pTopR.x) + ',' + f(pTopR.y) + ' ' +
+          f(pBotR.x) + ',' + f(pBotR.y) + ' ' +
+          f(pBotL.x) + ',' + f(pBotL.y) +
+        '" fill="' + color + '" fill-opacity="0.14" stroke="' + color + '" stroke-width="1"/>' +
+        // Guide lines at top (sup thickness) and bottom (inf thickness)
+        '<line x1="' + f(pTopL.x) + '" y1="' + f(yTop) + '" x2="' + f(pTopR.x) + '" y2="' + f(yTop) + '" stroke="' + color + '" stroke-width="0.5" opacity="0.7"/>' +
+        '<line x1="' + f(pBotL.x) + '" y1="' + f(yBot) + '" x2="' + f(pBotR.x) + '" y2="' + f(yBot) + '" stroke="' + color + '" stroke-width="0.5" opacity="0.7"/>' +
+      '</g>' +
+      // Labels: positioned at the rotated polygon's top/bottom anchors but rendered upright
+      '<text class="ts" x="' + f(topAnchor.x) + '" y="' + f(topAnchor.y - 28) + '" text-anchor="middle" fill="' + color + '" font-weight="600">sup</text>' +
+      '<text class="ts" x="' + f(topAnchor.x) + '" y="' + f(topAnchor.y - 14) + '" text-anchor="middle" fill="' + color + '">' + hSup.toFixed(2) + ' mm</text>' +
+      '<text class="ts" x="' + f(botAnchor.x) + '" y="' + f(botAnchor.y + 24) + '" text-anchor="middle" fill="' + color + '">' + hInf.toFixed(2) + ' mm</text>' +
+      '<text class="ts" x="' + f(botAnchor.x) + '" y="' + f(botAnchor.y + 38) + '" text-anchor="middle" fill="' + color + '" font-weight="600">inf</text>';
 
     g.innerHTML = html;
   }
@@ -726,8 +744,8 @@
     setText('section1-header', 'Section - sup/inf (' + a1 + '°)');
     setText('section2-header', 'Section - ant/post (' + a2 + '°)');
 
-    drawSideVertical('side-view-1', D, h1max, h1min, 510, 160, '#378ADD', !mirrored);
-    drawSide('side-view-2', D, hVisualLeft, hVisualRight, 510, 353, '#1D9E75', leftAnat, rightAnat);
+    drawSideVertical('side-view-1', D, h1max, h1min, 510, 160, '#378ADD', mirrored);
+    drawSide('side-view-2', D, hVisualLeft, hVisualRight, 510, 365, '#1D9E75', leftAnat, rightAnat);
     drawResultLine('result-slope-line', resultDirRad, resultMin, resultMax, clockStr);
 
     // Anatomical heights: anterior is the lower side, posterior is the higher
