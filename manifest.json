@@ -1,6 +1,6 @@
 {
-  "name": "GlenoidApp",
-  "short_name": "GlenoidApp",
+  "name": "ShoulderApp",
+  "short_name": "ShoulderApp",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
